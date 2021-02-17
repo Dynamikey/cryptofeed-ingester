@@ -1,1 +1,1 @@
-# cryptofeed-ingester
+# cryptofeed ingester

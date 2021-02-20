@@ -49,7 +49,7 @@ subscriptions = {
     FUTURE: [TICKER],
 }
 
-postgres_cfg = {'host': 'localhost', 'user': 'postgres', 'db': 'fs', 'pw': None}
+postgres_cfg = {'host': 'localhost', 'user': 'postgres', 'db': 'fs', 'pw': 'password'}
 
 def main():
     f = FeedHandler()

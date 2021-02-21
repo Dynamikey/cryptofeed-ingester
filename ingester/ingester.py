@@ -45,7 +45,7 @@ def get_time_from_timestamp(timestamp):
 
 subscriptions = {
     PERPETURAL: [TICKER],
-    OPTION: [TICKER, TRADES, L2_BOOK],
+    OPTION: [TICKER, TRADES],
     FUTURE: [TICKER],
 }
 

@@ -3,12 +3,15 @@ from decimal import Decimal
 import datetime
 from collections import defaultdict
 import functools
+import logging
 
+from cryptofeed.config import Config
 from cryptofeed import FeedHandler
 from cryptofeed.backends.postgres import DeribitBookPostgres, DeribitTickerPostgres, DeribitTradePostgres
 from cryptofeed.callback import DeribitTickerCallback
 from cryptofeed.defines import BID, ASK, TRADES, L2_BOOK, PERPETURAL, OPTION, FUTURE, TICKER
 from cryptofeed.exchanges import Deribit
+from cryptofeed.log import get_logger
 from cryptofeed.util.instrument import get_instrument_type
 
 async def do_periodically_at(hour, minute, second, periodic_function):
@@ -16,13 +19,13 @@ async def do_periodically_at(hour, minute, second, periodic_function):
         t = datetime.datetime.today()
         future = datetime.datetime(t.year, t.month, t.day, hour, minute, second)
         if t >= future:
-            print(f'{t} > {future}')
+            LOG.info(f'{t} > {future}')
             future += datetime.timedelta(days=1)
         delay = (future - t).total_seconds()
         h = (int)(delay/3600)
         m = int((delay-h*3600)/60)
         s = (int)(delay%60)
-        print(f'Waiting {h} hours {m} minutes {s} seconds to execute periodic function')
+        LOG.info(f'Waiting {h} hours {m} minutes {s} seconds to execute periodic function')
         await asyncio.sleep(delay)
         await periodic_function()
 
@@ -50,9 +53,12 @@ subscriptions = {
 }
 
 postgres_cfg = {'host': 'localhost', 'user': 'postgres', 'db': 'fs', 'pw': 'password'}
+LOG = logging.getLogger('ingester')
 
 def main():
-    f = FeedHandler()
+    config = Config(config={'log': {'filename': 'ingester.log', 'level': 'DEBUG'}})
+    get_logger('ingester', config.log.filename, config.log.level)
+    f = FeedHandler(config=config)
     callbacks = {
         TICKER: DeribitTickerPostgres(**postgres_cfg, cache_size=1000), 
         TRADES: DeribitTradePostgres(**postgres_cfg),
